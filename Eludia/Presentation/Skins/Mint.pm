@@ -3583,7 +3583,11 @@ EOH
 				tree.bind("dataBound", debounce(window.parent.treeview_select_node, 500));
 				tree.dataSource.read();
 			} else {
-				window.parent.location.reload ();
+				if ($id_selected_node) {
+					window.parent.location.reload ();
+				} else {
+					window.parent.location.href = '$_REQUEST{__refresh_tree}&salt=' + Math.random ();
+				}
 			}
 		};
 	}
