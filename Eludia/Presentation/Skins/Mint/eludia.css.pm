@@ -711,8 +711,18 @@ a.hint {
 	FONT-SIZE: 13px !important;
 }
 .k-widget.k-upload {
-	width: 20%;
+	width: 50%;
 }
+.k-tooltip {
+	position: relative;
+	background-color: #f7f7ad!important;
+	border-radius: 5px;
+	border: 1px solid #A6AFBE!important;
+}
+.k-tooltip .k-tooltip-content {
+	color: #333;
+}
+
 #waiting_screen {
 	position: fixed;
 	top: 0;

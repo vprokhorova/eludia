@@ -954,6 +954,41 @@ EOH
 		<input type='hidden' name='_file_clear_flag_for_$$options{name}' id='_file_clear_flag_for_$$options{name}'>
 EOH
 
+	if ($options -> {no_limit}) {
+		$html .= <<EOH;
+		<input type='hidden' name='_file_no_limit_for_$$options{name}' id='_file_no_limit_for_$$options{name}' value='1'>
+EOH
+	}
+
+	if ($options -> {file_extensions}) {
+
+		my $file_extensions = join(',', @{$options->{file_extensions}});
+
+		$html .= <<EOH ;
+			<input
+				type="hidden"
+				name="_file_extensions_for_$$options{name}"
+				value="$file_extensions"
+			>
+EOH
+	}
+
+	$html .= $options -> {max_file_size} ? <<EOH : '';
+		<input
+			type="hidden"
+			name="_max_file_size_for_$$options{name}"
+			value="$options->{max_file_size}"
+		>
+EOH
+
+	$html .= $options -> {file_max_name_length} ? <<EOH : '';
+		<input
+			type="hidden"
+			name="_file_max_name_length_for_$$options{name}"
+			value="$options->{file_max_name_length}"
+		>
+EOH
+
 	$html .= "</span>";
 
 	return $html;
@@ -1027,8 +1062,44 @@ EOH
 
 EOH
 
-	return <<EOH;
+	my $html;
 
+	if ($options -> {file_extensions}) {
+
+		my $file_extensions = join(',', @{$options->{file_extensions}});
+
+		$html .= <<EOH ;
+			<input
+				type="hidden"
+				name="_file_extensions_for_$$options{name}"
+				value="$file_extensions"
+			>
+EOH
+	}
+
+	$html .= $options -> {no_limit} ? <<EOH : '';
+		<input
+			type="hidden"
+			name="_file_no_limit_for_$$options{name}"
+			value="1"
+		>
+EOH
+	$html .= $options -> {max_file_size} ? <<EOH : '';
+		<input
+			type="hidden"
+			name="_max_file_size_for_$$options{name}"
+			value="$options->{max_file_size}"
+		>
+EOH
+	$html .= $options -> {file_max_name_length} ? <<EOH : '';
+		<input
+			type="hidden"
+			name="_file_max_name_length_for_$$options{name}"
+			value="$options->{file_max_name_length}"
+		>
+EOH
+
+	$html .= <<EOH;
 		<input
 			type="hidden"
 			name="__$$options{name}_file_field"
@@ -1040,6 +1111,8 @@ EOH
 		</span>
 
 EOH
+
+	return $html;
 
 }
 

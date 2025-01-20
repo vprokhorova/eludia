@@ -699,7 +699,7 @@ sub draw_form_field_file {
 		);
 
 	my $html = "<span id='form_field_file_head_$options->{name}'>" .
-		($options -> {note} ? "<span style='display:inline-block;' data-note='$options->{note}'>" : "");
+		($options -> {note} ? "<span style='display:flex;' data-note='$options->{note}'>" : "");
 
 	$$options{value} ||= $data -> {"$$options{name}_name"};
 
@@ -766,6 +766,35 @@ EOH
 EOH
 	}
 
+	if ($options -> {file_extensions}) {
+
+		my $file_extensions = join(',', @{$options->{file_extensions}});
+
+		$html .= <<EOH ;
+			<input
+				type="hidden"
+				name="_file_extensions_for_$$options{name}"
+				value="$file_extensions"
+			>
+EOH
+	}
+
+	$html .= $options -> {max_file_size} ? <<EOH : '';
+		<input
+			type="hidden"
+			name="_max_file_size_for_$$options{name}"
+			value="$options->{max_file_size}"
+		>
+EOH
+
+	$html .= $options -> {file_max_name_length} ? <<EOH : '';
+		<input
+			type="hidden"
+			name="_file_max_name_length_for_$$options{name}"
+			value="$options->{file_max_name_length}"
+		>
+EOH
+
 	$html .= '</span>' if $options -> {note};
 
 	$html .= '</span>';
@@ -783,8 +812,6 @@ sub draw_form_field_files {
 	$_REQUEST {__libs} -> {kendo} -> {upload} = 1;
 
 	my $attributes = dump_attributes ($options -> {attributes});
-
-	my $html;
 
 	$_REQUEST {__script} .= <<EOH;
 
@@ -805,7 +832,6 @@ sub draw_form_field_files {
 			\$('input[ name="_$$options{name}_' + file_field_$options->{name}_cnt  + '"]').kendoUpload({
 				multiple: false,
 			});
-
 		}
 
 		function file_field_remove_$options->{name} (id_file_field) {
@@ -815,6 +841,44 @@ sub draw_form_field_files {
 			\$(id_file_field).empty();
 
 		}
+EOH
+
+	my $html;
+
+	$html .= $options -> {no_limit} ? <<EOH : '';
+		<input
+			type="hidden"
+			name="_file_no_limit_for_$$options{name}"
+			value="1"
+		>
+EOH
+
+	if ($options -> {file_extensions}) {
+
+		my $file_extensions = join(',', @{$options->{file_extensions}});
+
+		$html .= <<EOH ;
+			<input
+				type="hidden"
+				name="_file_extensions_for_$$options{name}"
+				value="$file_extensions"
+			>
+EOH
+	}
+
+	$html .= $options -> {max_file_size} ? <<EOH : '';
+		<input
+			type="hidden"
+			name="_max_file_size_for_$$options{name}"
+			value="$options->{max_file_size}"
+		>
+EOH
+	$html .= $options -> {file_max_name_length} ? <<EOH : '';
+		<input
+			type="hidden"
+			name="_file_max_name_length_for_$$options{name}"
+			value="$options->{file_max_name_length}"
+		>
 EOH
 
 	$html .= <<EOH;
@@ -831,8 +895,15 @@ EOH
 		<span id="file_field_$options->{name}">
 EOH
 
-	$html .= <<EOH;
-			<div>
+	my $file_tooltip = !$preconf -> {file_tooltip} ? ''
+		: sprintf (
+			$preconf -> {file_tooltip},
+			join (', ', @{$options -> {file_extensions} || $preconf -> {file_extensions}}),
+			$options -> {max_file_size} || $preconf -> {max_file_size},
+			$options -> {file_max_name_length} || $preconf -> {file_max_name_length},
+		);
+
+	$html .= ($options -> {no_limit} || !$file_tooltip ? '<div>' : "<div data-tooltip='$file_tooltip'>") . <<EOH;
 				<span id="file_field_$options->{name}_head" style="display: flex;">
 					<input name="_$$options{name}_1" type="file"  $attributes />
 					<a href="javaScript:file_field_add_$options->{name}();void(0);"><img height=18 src="$_REQUEST{__static_url}/tree_nolines_plus.gif?$_REQUEST{__static_salt}" width=18></a>

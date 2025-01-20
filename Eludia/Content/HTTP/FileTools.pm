@@ -216,6 +216,70 @@ sub upload_file {
 		return undef;
 	}
 
+	my $no_limit_param = '_file_no_limit_for_' . $options -> {name};
+
+	$no_limit_param =~ s/_\d+$//;
+
+	$options -> {no_limit} = $_REQUEST {$no_limit_param} if exists $_REQUEST {$no_limit_param};
+
+	if (!$options -> {no_limit} && $filename) {
+
+		my $file_extensions = '_file_extensions_for_' . $options -> {name};
+		$file_extensions =~ s/_\d+$//;
+
+		$options -> {file_extensions} = [split /,/, $_REQUEST {$file_extensions}] if exists $_REQUEST {$file_extensions};
+
+		$options -> {file_extensions} ||= $preconf -> {file_extensions};
+
+		@{$options -> {file_extensions}} > 0 or delete $options -> {file_extensions};
+
+		if ($options -> {file_extensions} && !($filename =~ /\.([^\.]*?)$/ && (grep {lc ($1) eq lc $_} @{$options -> {file_extensions}}))) {
+			my $error = $i18n -> {file_ext_fail} . join ', ', map { '.' . $_ } @{$options -> {file_extensions}};
+
+			if ($options -> {error_result}) {
+				return {error => $error};
+			} else {
+				croak "#_$$options{name}#:$filename: " . $error;
+			}
+			return undef;
+		};
+
+		my $max_file_size = '_max_file_size_for_' . $options -> {name};
+		$max_file_size =~ s/_\d+$//;
+		$options -> {max_file_size} = $_REQUEST {$max_file_size} if exists $_REQUEST {$max_file_size};
+		$options -> {max_file_size} ||= $preconf -> {max_file_size};
+
+		if ($options -> {max_file_size} && $file_size > ($options -> {max_file_size} << 20)) {
+
+			my $error = sprintf ($i18n -> {max_file_size_fail}, $options -> {max_file_size});
+			if ($options -> {error_result}) {
+				return {error => $error};
+			} else {
+				croak "#_$$options{name}#:$filename: " . $error;
+			}
+			return undef;
+
+		}
+
+		my $file_max_name_length = '_file_max_name_length_for_' . $options -> {name};
+		$file_max_name_length =~ s/_\d+$//;
+		$options -> {file_max_name_length} = $_REQUEST {$file_max_name_length} if exists $_REQUEST {$file_max_name_length};
+		$options -> {file_max_name_length} ||= $preconf -> {file_max_name_length};
+
+		if ($options -> {file_max_name_length} && length $filename > $options -> {file_max_name_length}) {
+			my $error = sprintf ($i18n -> {file_max_name_length_fail}, $options -> {file_max_name_length});
+
+			if ($options -> {error_result}) {
+				return {error => $error};
+			} else {
+				croak "#_$$options{name}#:$filename: " . $error;
+			}
+
+			return undef;
+		}
+
+	}
+
 	my ($path, $real_path) = upload_path ($filename, $options);
 
 	open (OUT, ">$real_path") or die "Can't write to $real_path: $!";
