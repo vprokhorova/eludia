@@ -2809,9 +2809,9 @@ sub draw_text_cell {
 	$data -> {label} =~ s{\n}{<br>}gsm if $data -> {no_nobr};
 
 	if ($data -> {status} && -r $r -> document_root . "$_REQUEST{__static_url}/status_$data->{status}->{icon}.gif") {
-		$html .= qq {<img style="width:11px;height:11px;" src='$_REQUEST{__static_url}/status_$data->{status}->{icon}.gif' border=0 alt='$data->{status}->{label}' align=absmiddle hspace=5>};
+		$html .= qq {<img style="width:11px;height:11px;" src='$_REQUEST{__static_url}/status_$data->{status}->{icon}.gif' border=0 alt='$data->{status}->{label}' title='$data->{status}->{label}' align=absmiddle hspace=5>};
 	} elsif ($data -> {status} && -r $r -> document_root . "$_REQUEST{__static_url}/status_$data->{status}->{icon}.png") {
-		$html .= qq {<img style="width:16px;height:16px;" src='$_REQUEST{__static_url}/status_$data->{status}->{icon}.png' border=0 alt='$data->{status}->{label}' align=absmiddle hspace=5>};
+		$html .= qq {<img style="width:16px;height:16px;" src='$_REQUEST{__static_url}/status_$data->{status}->{icon}.png' border=0 alt='$data->{status}->{label}' title='$data->{status}->{label}' align=absmiddle hspace=5>};
 	}
 
 	$html .= '<b>'      if $data -> {bold}   || $options -> {bold};
