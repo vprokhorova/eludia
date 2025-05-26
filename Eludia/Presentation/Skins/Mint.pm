@@ -536,6 +536,91 @@ EOS
 
 ################################################################################
 
+sub draw_redirect_page {
+
+	my ($_SKIN, $options) = @_;
+
+	$options -> {$_} ||= '' foreach qw (before window_options);
+
+	if ($options -> {message}) {
+
+		$options -> {message_type} ||= "warning";
+
+		my $data = $_JSON -> encode ([$options]);
+
+		$options -> {before} .= <<EOJS
+			if (top.localStorage) {
+				var data = $data;
+				top.localStorage ['message'] = data [0].message;
+				top.localStorage ['message_type'] = data[0].message_type;
+			}
+EOJS
+
+	}
+
+	my $salt = $options -> {no_check_url}? "''" : "'&salt=' + Math.random ()";
+
+	$_REQUEST{__script} = <<EOJS;
+		function redirect () {
+			$options->{before}
+			var w = window,
+				target = window.name == 'invisible' ? parent : window;
+			w.is_redirecting = 1;
+			if ('$$options{target}')
+				w.open ('$options->{url}' + $salt, '$$options{target}', '$options->{window_options}');
+			else
+				target.location.href = '$options->{url}';
+		}
+EOJS
+
+	if ($options -> {label}) {
+
+		my $data = $_JSON -> encode ([$options -> {label}]);
+
+		$_REQUEST{__script} .= <<EOJS;
+			function on_load() {
+				var data = $data;
+
+				if (window.name == 'invisible') {
+					parent.alert(data[0], null, { on_close: function() { redirect(); }, title: 'Внимание'});
+				} else {
+					alert(data[0], null, { on_close: function() { redirect(); }, title: 'Внимание'});
+				}
+			}
+EOJS
+
+	} else {
+
+		$_REQUEST{__script} .= <<EOJS;
+			function on_load() {
+				redirect();
+			}
+EOJS
+	}
+
+	return <<EOS;
+<html>
+	<head>
+		<link href='/i/mint/libs/KendoUI/styles/kendo.common.min.css' type="text/css" rel="stylesheet">
+		<link href='/i/mint/libs/KendoUI/styles/kendo.bootstrap.min.css' type="text/css" rel="stylesheet">
+		<link rel="stylesheet" href="/i/_skins/Mint/eludia.css" type="text/css">
+		<link rel="stylesheet" href="/i/mint/libs/SuperTable/supertable.css" type="text/css">
+		<script src="/i/mint/libs/KendoUI/js/jquery.min.js"></script>
+		<script src="/i/mint/libs/KendoUI/js/kendo.core.min.js"></script>
+		<script src="/i/mint/libs/KendoUI/js/kendo.window.min.js"></script>
+		<script src="$_REQUEST{__static_url}/navigation.js"></script>
+		<script>
+			$_REQUEST{__script}
+		</script>
+	</head>
+	<body onLoad="on_load ()"></body>
+</html>
+EOS
+
+}
+
+################################################################################
+
 sub draw_form_field {
 
 
