@@ -458,6 +458,84 @@ EOJS
 
 ################################################################################
 
+sub draw_error_page {
+
+	my ($_SKIN, $page, $error) = @_;
+
+	$_REQUEST {__content_type} ||= 'text/html; charset=' . $i18n -> {_charset};
+
+	my $data = $_JSON -> encode ([$error -> {label}]);
+
+	if ($page -> {error_field}) {
+		$_REQUEST{__script} .= <<EOJ;
+			var e = window.parent.document.getElementsByName('$page->{error_field}');
+			if (e && e[0]) { try {e[0].focus ()} catch (e) {} }
+EOJ
+	}
+
+	if ($preconf -> {core_dbl_click_protection}) {
+		$_REQUEST{__script} .= <<EOJ;
+			var __salt = Math.random ();
+			var salt_elements = window.parent.document.getElementsByName('__salt');
+			try {
+				for (var i=0; i < salt_elements.length; i ++) {
+					salt_elements [i].value = __salt;
+				}
+			} catch (e) {}
+
+			var anchor_elements = window.parent.document.getElementsByTagName('a');
+
+			for (var i=0; i < anchor_elements.length; i ++) {
+
+				try {
+					if (anchor_elements [i].href.indexOf('__salt=') != -1)
+						anchor_elements [i].href = anchor_elements [i].href.replace (/__salt=([\\d\\.]+)/, '__salt=' + __salt);
+				} catch (e) {}
+
+			}
+EOJ
+	}
+
+	my $back = $_REQUEST {__no_back} ? '' : "if (window.name != 'invisible') history.go (-1);";
+
+	$_REQUEST {__script} = <<EOJ;
+function on_load () {
+	var data = $data;
+
+	if (window.name == 'invisible') {
+		parent.alert(data[0], null, { on_close: function() { $back } });
+	} else {
+		alert(data[0], null, { on_close: function() { $back } });
+	}
+	try {window.parent.setCursor ()} catch (e) {}
+	window.parent.document.body.style.cursor = 'default';
+	try {window.parent.poll_invisibles ()} catch (e) {}
+}
+EOJ
+
+	return <<EOS;
+<html>
+	<head>
+		<link href='/i/mint/libs/KendoUI/styles/kendo.common.min.css' type="text/css" rel="stylesheet">
+		<link href='/i/mint/libs/KendoUI/styles/kendo.bootstrap.min.css' type="text/css" rel="stylesheet">
+		<link rel="stylesheet" href="/i/_skins/Mint/eludia.css" type="text/css">
+		<link rel="stylesheet" href="/i/mint/libs/SuperTable/supertable.css" type="text/css">
+		<script src="/i/mint/libs/KendoUI/js/jquery.min.js"></script>
+		<script src="/i/mint/libs/KendoUI/js/kendo.core.min.js"></script>
+		<script src="/i/mint/libs/KendoUI/js/kendo.window.min.js"></script>
+		<script src="$_REQUEST{__static_url}/navigation.js"></script>
+		<script>
+			$_REQUEST{__script}
+		</script>
+	</head>
+	<body onLoad="on_load ()"></body>
+</html>
+EOS
+
+}
+
+################################################################################
+
 sub draw_form_field {
 
 
