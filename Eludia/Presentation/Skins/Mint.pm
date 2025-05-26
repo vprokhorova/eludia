@@ -4526,11 +4526,19 @@ sub dialog_close {
 	$r -> print (<<EOH);
 <html>
 	<head>
+        <link href='/i/mint/libs/KendoUI/styles/kendo.common.min.css' type="text/css" rel="stylesheet">
+		<link href='/i/mint/libs/KendoUI/styles/kendo.bootstrap.min.css' type="text/css" rel="stylesheet">
+		<link rel="stylesheet" href="/i/_skins/Mint/eludia.css" type="text/css">
+		<link rel="stylesheet" href="/i/mint/libs/SuperTable/supertable.css" type="text/css">
+		<script src="/i/mint/libs/KendoUI/js/jquery.min.js"></script>
+		<script src="/i/mint/libs/KendoUI/js/kendo.core.min.js"></script>
+		<script src="/i/mint/libs/KendoUI/js/kendo.window.min.js"></script>
+		<script src="$_REQUEST{__static_url}/navigation.js"></script>
 		<script>
 
 			function load () {
 				var a = $a;
-				if (a.alert) alert (a.alert);
+				if (a.alert) alert (a.alert, null, {title: 'Внимание'});
 
 				var w = window, i = 0;
 
