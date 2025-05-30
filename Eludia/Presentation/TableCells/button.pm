@@ -8,14 +8,24 @@ sub draw_button_cell {
 	check_href ($options);
 
 	if ($options -> {confirm}) {
+
 		my $salt = rand;
+
 		my $msg = js_escape ($options -> {confirm});
+
 		$options -> {href} =~ s{\%}{\%25}gsm; 		# MSIE uri_unescapes the 1st arg of window.open
+
 		my $target = $options -> {target} || '_self';
+
 		if ($options -> {href} =~ s/^javascript://i) {
-			$options -> {href} = qq [javascript:if (confirm ($msg)) {$$options{href}}];
-		}else{
-			$options -> {href} = qq [javascript:if (confirm ($msg)) {nope('$$options{href}', '$target')} else {document.body.style.cursor = 'default'; nop ();}];
+
+			$options -> {href} = $_REQUEST {__skin} eq 'Mint' ? qq {javascript:confirm ($msg, function () {$$options{href}}, function () {nop()});}
+				: qq {javascript:if (confirm ($msg)) {$$options{href}}};
+
+		} else {
+
+			$options -> {href} = $_REQUEST {__skin} eq 'Mint' ? qq {javascript:confirm ($msg, function () {nope('$$options{href}','$target')}, function () {nop()}); nop();}
+				: qq {javascript:if (confirm ($msg)) {nope('$$options{href}', '$target')} else {document.body.style.cursor = 'default'; nop ();}};
 		}
 	}
 
