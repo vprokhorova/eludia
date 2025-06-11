@@ -469,7 +469,7 @@ EOJS
 		var options = $options;
 
 		options.after = function() {
-			window.unblockui();
+			if (window.name != 'invisible') { history.go (-1)};
 		};
 
 		if (eludia_frame.dialog_open) {
