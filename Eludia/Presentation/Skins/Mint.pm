@@ -1825,6 +1825,8 @@ sub draw_toolbar {
 
 	my ($_SKIN, $options) = @_;
 
+	return '' if $_REQUEST {__only_table};
+
 	if ($_REQUEST {select}) {
 
 		my $button = {
