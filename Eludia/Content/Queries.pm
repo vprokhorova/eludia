@@ -478,6 +478,8 @@ sub do_update___queries {
 	}
 
 	$esc_href =~ s/\bstart=\d+\&?//;
+	$esc_href =~ s/\bdesc=\d\&?//;
+	$esc_href =~ s/\border=\w*\&?//;
 
 	redirect ($esc_href, {kind => 'js'});
 
