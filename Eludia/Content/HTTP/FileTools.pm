@@ -52,6 +52,7 @@ sub download_file_header {
 
 	if ($range_header =~ /bytes=(\d+)/) {
 		$start = $1;
+		$r -> status (206);
 		my $finish = $content_length - 1;
 		$r -> headers_out -> {'Content-Range'} = "bytes $start-$finish/$content_length";
 		$content_length -= $start;
